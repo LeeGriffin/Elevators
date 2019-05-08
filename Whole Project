@@ -1,0 +1,123 @@
+Alright, in the first part it is just a proof of concpect, I am trying a few ARIMA models just to see if this in fact is going to work
+It is a pretty cool plot at the end, I will try and post somewhere (I am also pretty novice at using Github)
+############################################################################################################################################
+
+library(readxl)
+library(forecast)
+fake_baseline_data <- read_excel("C:/Users/lee/Desktop/fake_baseline_data.xlsx", sheet = "Sheet2", col_types = c("date", "numeric", "numeric", "numeric", "numeric"))
+head(fake_baseline_data)
+plot(`Floor Enter`, type = "l")
+
+attach(fake_baseline_data)
+floor_enter <- c(fake_baseline_data$'Floor Enter')
+data.ts<-ts(floor_enter, frequency = 144)
+tsclean(data.ts)
+mod1<-Arima(data.ts,order=c(1, 0, 0),
+            seasonal=list(order=c(2, 1, 0), period=12))
+print(mod1)
+mod2<-auto.arima(data.ts, seasonal = "TRUE")
+print(mod2)
+plot(fitted(mod1), mod2$residuals)
+plot(fitted(mod1), mod2$residuals, type="l")
+plot(mod2$x, col='red')
+lines(fitted(mod2), col='blue')
+mod3<-auto.arima(data.ts,D=1)
+plot(mod3$residuals)
+print(mod3)
+#mod4<-auto.arima(data.ts, d =5)
+
+
+#predict1(mod1, n.ahead = 288)
+mod1.predict <- predict(mod1, n.ahead = 288)
+plot(data.ts,xlim = c(0,8))
+lines(mod1.predict$pred, col="blue")
+#lines(mod1.predict$pred - 1.96*mod1.predict$se, col + "red")
+#lines(mod1.predict$pred + 1.96*mod1.predict$se, col = "red")
+
+#predict2(mod2, n.ahead = 288)
+mod2.predict <- predict(mod2, n.ahead = 288)
+plot(data.ts,xlim = c(0, 8))
+lines(mod2.predict$pred, col="blue")
+#lines(mod2.predict$pred - 1.96*mod1.predict$se, col + "red")
+#lines(mod2.predict$pred + 1.96*mod1.predict$se, col = "red")
+
+#predict3(mod3, n.ahead = 288)
+mod3.predict <- predict(mod3, n.ahead = 288)
+plot(data.ts,xlim = c(0, 8))
+lines(mod3.predict$pred, col="blue")
+#lines(mod3.predict$pred - 1.96*mod1.predict$se, col + "red")
+#lines(mod3.predict$pred + 1.96*mod1.predict$se, col = "red")
+
+
+
+###############################################################Some More Fuck Yes Stuff##########################
+Okay so now I have 1500 obervations from a day that you represent 1500 uses of a single elevator in a day
+#################################################################################################################
+
+library(readr)
+library(dplyr)
+new_data2 <- read_csv("R Stuff/new_data.csv", col_types = cols(date = col_date(format = "%Y/%m/%d"), time = col_time(format = "%H:%M")))
+
+z <- c(runif(1500,1,10))
+a <- round(z)
+enter3 <- new_data2 %>% mutate(enter = if_else(arrive == 1, 2, a))
+enter4 <- enter3 %>% mutate(exit = if_else(arrive ==0, 2, a))
+ts(enter4)
+enter5 <- enter4 %>% mutate(current_loc = lag(exit, n = 1L))
+enter6 <- enter5 %>% mutate(current_loc_diff = enter - current_loc)
+enter7 <- enter6 %>% mutate(current_loc_time_sec = (3 + 1*current_loc_diff))
+enter8 <- enter7 %>% mutate(ran_loc = round(runif(1500,1,10)))
+enter8 <- enter8 %>% mutate(ran_loc_diff = lag(exit, n = 1L))
+enter9 <- enter8 %>% mutate(ran_loc_time_sec = (3 + 1*ran_loc_diff))
+attach(enter9)
+sum(current_loc_time_sec, na.rm = TRUE)
+sum(ran_loc_time_sec, na.rm = TRUE)
+
+###########################################################Now I have to be able to collapse it##################
+
+round_any <- function(x, accuracy, f=round){f(x/ accuracy) * accuracy}
+enter10 <- enter9 %>% mutate(round_time = round_any(time_fraction, (1/144)))
+enter11 <- aggregate(enter10, by = list(round_time), FUN = "mean")
+enter12 <- enter11 %>% mutate(rounded_enter = round_any(enter, 1))
+
+attach(enter12)
+plot(rounded_enter, type = "l")
+
+####Okay So I need to generate some new varibles for times when nobody was there 
+
+library(sqldf)
+time_slot_beta <- c(1:144)
+time_slot <- (time_slot_beta/144) 
+base_enter <- data.frame(c("enter_beta" <- 2), c(time_slot))
+base_enter <- base_enter %>% mutate(id2 <- c(1:144))
+names(base_enter)[3] <- "ind2"
+
+entersql <- sqldf('Select enter, round_time, ind2, "c.time_slot."
+                   from base_enter
+                   left join enter12  on round_time = "c.time_slot."')
+
+
+
+enter13 <- enter12 %>% mutate(round_time_144 <- c(round_time * 144))
+names(enter13)[19] <- "round_time_144"
+base_enter5 <- base_enter %>% mutate(round_time_base_144 <- c(c.time_slot. * 144))
+names(base_enter5)[5] <- "round_time_base_144"
+enter13 <- enter13 %>% mutate(final_round_time_144 <- round_any(round_time_144, 1))
+names(enter13)[20] <- "final_round_time_144"
+
+entersql2 <- sqldf('Select enter, round_time, ind2, round_time_144, round_time_base_144
+                  from base_enter5
+                  left join enter13  on final_round_time_144 = round_time_base_144')
+
+#######alright changing my data (NA to 2)###########################################################
+
+entersql2$enter <- ifelse(is.na(entersql2$enter), 2, entersql2$enter)
+plot(entersql2$enter, type = "l")
+#oh shit that was not the rounded_enter -> ah okay
+entersql2$rounded_enter <- ifelse(is.na(entersql2$rounded_enter), 2, entersql2$rounded_enter)
+plot(entersql2$rounded_enter, type = "l")
+
+
+######################################################################################################
+####So now i have to my data, now I just need to run the forcast on my new data (Currently working on this I will post it when it works)
+######################################################################################################
