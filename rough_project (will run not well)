@@ -26,6 +26,7 @@ plot(mod3$residuals)
 print(mod3)
 #mod4<-auto.arima(data.ts, d =5)
 
+#alright so i have a few models lets see which one works best
 
 #predict1(mod1, n.ahead = 288)
 mod1.predict <- predict(mod1, n.ahead = 288)
@@ -41,6 +42,7 @@ lines(mod2.predict$pred, col="blue")
 #lines(mod2.predict$pred - 1.96*mod1.predict$se, col + "red")
 #lines(mod2.predict$pred + 1.96*mod1.predict$se, col = "red")
 
+#So it looks the like ARMIA model were i force seasonality
 #predict3(mod3, n.ahead = 288)
 mod3.predict <- predict(mod3, n.ahead = 288)
 plot(data.ts,xlim = c(0, 8))
@@ -52,6 +54,7 @@ lines(mod3.predict$pred, col="blue")
 
 ###############################################################Some More Good Stuff##########################
 #Okay so now I have 1500 obervations from a day that you represent 1500 uses of a single elevator in a day
+#So the basic data does not have a bunch of stuff, so I have to add some obersvations
 #################################################################################################################
 
 library(readr)
@@ -70,6 +73,7 @@ enter8 <- enter7 %>% mutate(ran_loc = round(runif(1500,1,10)))
 enter8 <- enter8 %>% mutate(ran_loc_diff = lag(exit, n = 1L))
 enter9 <- enter8 %>% mutate(ran_loc_time_sec = (3 + 1*ran_loc_diff))
 attach(enter9)
+#looks like the random floor does worse than the first lag
 sum(current_loc_time_sec, na.rm = TRUE)
 sum(ran_loc_time_sec, na.rm = TRUE)
 
@@ -108,7 +112,8 @@ names(enter13)[20] <- "final_round_time_144"
 entersql2 <- sqldf('Select enter, round_time, ind2, round_time_144, round_time_base_144
                   from base_enter5
                   left join enter13  on final_round_time_144 = round_time_base_144')
-
+                  
+#that was messy but I finally got my join
 #######alright changing my data (NA to 2)###########################################################
 
 entersql2$enter <- ifelse(is.na(entersql2$enter), 2, entersql2$enter)
@@ -117,7 +122,7 @@ plot(entersql2$enter, type = "l")
 entersql2$rounded_enter <- ifelse(is.na(entersql2$rounded_enter), 2, entersql2$rounded_enter)
 plot(entersql2$rounded_enter, type = "l")
 
-
+#that went well
 ######################################################################################################
 ####So now i have to my data, now I just need to run the forcast on my new data (Currently working on this I will post it when it works)
 ######################################################################################################
@@ -131,3 +136,5 @@ mod13<-auto.arima(entersql2.ts, D=1)
 #using forcast here becuase it is easier (need to look to see if it is any difference than predict)
 forcast_entersql2.ts <- forecast(mod13, h=144)
 plot(forcast_entersql2.ts)
+
+#that took a while but I finally got my results
