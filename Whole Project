@@ -1,5 +1,5 @@
-Alright, in the first part it is just a proof of concpect, I am trying a few ARIMA models just to see if this in fact is going to work
-It is a pretty cool plot at the end, I will try and post somewhere (I am also pretty novice at using Github)
+#Alright, in the first part it is just a proof of concpect, I am trying a few ARIMA models just to see if this in fact is going to work
+#It is a pretty cool plot at the end, I will try and post somewhere (I am also pretty novice at using Github)
 ############################################################################################################################################
 
 library(readxl)
@@ -51,7 +51,7 @@ lines(mod3.predict$pred, col="blue")
 
 
 ###############################################################Some More Fuck Yes Stuff##########################
-Okay so now I have 1500 obervations from a day that you represent 1500 uses of a single elevator in a day
+#Okay so now I have 1500 obervations from a day that you represent 1500 uses of a single elevator in a day
 #################################################################################################################
 
 library(readr)
