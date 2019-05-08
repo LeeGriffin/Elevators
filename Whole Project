@@ -4,7 +4,7 @@
 
 library(readxl)
 library(forecast)
-fake_baseline_data <- read_excel("C:/Users/lee/Desktop/fake_baseline_data.xlsx", sheet = "Sheet2", col_types = c("date", "numeric", "numeric", "numeric", "numeric"))
+fake_baseline_data <- read_excel("Use fake_baseline_data.xlsx Here", sheet = "Sheet2", col_types = c("date", "numeric", "numeric", "numeric", "numeric"))
 head(fake_baseline_data)
 plot(`Floor Enter`, type = "l")
 
@@ -50,13 +50,13 @@ lines(mod3.predict$pred, col="blue")
 
 
 
-###############################################################Some More Fuck Yes Stuff##########################
+###############################################################Some More Good Stuff##########################
 #Okay so now I have 1500 obervations from a day that you represent 1500 uses of a single elevator in a day
 #################################################################################################################
 
 library(readr)
 library(dplyr)
-new_data2 <- read_csv("R Stuff/new_data.csv", col_types = cols(date = col_date(format = "%Y/%m/%d"), time = col_time(format = "%H:%M")))
+new_data2 <- read_csv("Use new_data.csv", col_types = cols(date = col_date(format = "%Y/%m/%d"), time = col_time(format = "%H:%M")))
 
 z <- c(runif(1500,1,10))
 a <- round(z)
