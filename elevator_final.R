@@ -1,4 +1,4 @@
-Here is my project on elevators
+#Here is my project on elevators
 
 library(readxl)
 library(forecast)
@@ -30,7 +30,7 @@ plot(forcast_mod3)
 
 
 ###############################################################Some More Good Stuff##########################
-#Okay so now I have 1500 obervations from a day that you represent 1500 uses of a single elevator in a day
+# new data represents 1500 uses of a single elevator in a day
 #Okay so I need to generate some new vars 
 #################################################################################################################
 
