@@ -27,8 +27,8 @@ plot(mod3$residuals)
 print(mod3)
 #mod4<-auto.arima(data.ts, d =5)
 
-#alright so i have a few models, using predict here because that is what the frist example I came accross used
-
+ #alright so i have a few models, using predict here because that is what the first example I came across used
+ 
 #predict1(mod1, n.ahead = 288)
 mod1.predict <- predict(mod1, n.ahead = 288)
 plot(data.ts,xlim = c(0,8))
@@ -43,7 +43,8 @@ lines(mod2.predict$pred, col="blue")
 #lines(mod2.predict$pred - 1.96*mod1.predict$se, col + "red")
 #lines(mod2.predict$pred + 1.96*mod1.predict$se, col = "red")
 
-#So it looks the like ARMIA model were i force seasonality is the only one that gives me useable awnsers
+#So it looks the like ARMIA model were i force seasonality is the only one that gives me usable answers
+
 #predict3(mod3, n.ahead = 288)
 mod3.predict <- predict(mod3, n.ahead = 288)
 plot(data.ts,xlim = c(0, 8))
