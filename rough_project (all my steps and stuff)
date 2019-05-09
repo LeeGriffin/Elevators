@@ -11,7 +11,8 @@ plot(`Floor Enter`, type = "l")
 attach(fake_baseline_data)
 floor_enter <- c(fake_baseline_data$'Floor Enter')
 data.ts<-ts(floor_enter, frequency = 144)
-tsclean(data.ts)
+tsclean(data.ts) #not needed but hey wanted to see what it did
+#first model
 mod1<-Arima(data.ts,order=c(1, 0, 0),
             seasonal=list(order=c(2, 1, 0), period=12))
 print(mod1)
@@ -26,7 +27,7 @@ plot(mod3$residuals)
 print(mod3)
 #mod4<-auto.arima(data.ts, d =5)
 
-#alright so i have a few models lets see which one works best
+#alright so i have a few models, using predict here because that is what the frist example I came accross used
 
 #predict1(mod1, n.ahead = 288)
 mod1.predict <- predict(mod1, n.ahead = 288)
@@ -42,7 +43,7 @@ lines(mod2.predict$pred, col="blue")
 #lines(mod2.predict$pred - 1.96*mod1.predict$se, col + "red")
 #lines(mod2.predict$pred + 1.96*mod1.predict$se, col = "red")
 
-#So it looks the like ARMIA model were i force seasonality
+#So it looks the like ARMIA model were i force seasonality is the only one that gives me useable awnsers
 #predict3(mod3, n.ahead = 288)
 mod3.predict <- predict(mod3, n.ahead = 288)
 plot(data.ts,xlim = c(0, 8))
@@ -54,7 +55,7 @@ lines(mod3.predict$pred, col="blue")
 
 ###############################################################Some More Good Stuff##########################
 #Okay so now I have 1500 obervations from a day that you represent 1500 uses of a single elevator in a day
-#So the basic data does not have a bunch of stuff, so I have to add some obersvations
+#So the basic data does not have a bunch of stuff, so I have to add some new variables
 #################################################################################################################
 
 library(readr)
@@ -87,7 +88,7 @@ enter12 <- enter11 %>% mutate(rounded_enter = round_any(enter, 1))
 attach(enter12)
 plot(rounded_enter, type = "l")
 
-####Okay So I need to generate some new varibles for times when nobody was there 
+####Alright, had some issues with my join, could not get my vars lined up
 
 library(sqldf)
 time_slot_beta <- c(1:144)
@@ -96,11 +97,12 @@ base_enter <- data.frame(c("enter_beta" <- 2), c(time_slot))
 base_enter <- base_enter %>% mutate(id2 <- c(1:144))
 names(base_enter)[3] <- "ind2"
 
+#the syntax was a little tricky here so I just did it in a query
 entersql <- sqldf('Select enter, round_time, ind2, "c.time_slot."
                    from base_enter
                    left join enter12  on round_time = "c.time_slot."')
 
-
+####Okay So I need to generate some new varibles for times when nobody was there 
 
 enter13 <- enter12 %>% mutate(round_time_144 <- c(round_time * 144))
 names(enter13)[19] <- "round_time_144"
