@@ -5,9 +5,9 @@ library(forecast)
 library(dplyr)
 library(sqldf)
 
-#five days of random data to prove the concept
+#five days of random data to prove the concept 
 fake_baseline_data <- read_excel("Use fake_baseline_data.xlsx Here", sheet = "Sheet2", col_types = c("date", "numeric", "numeric", "numeric", "numeric"))
-#1500 observations over the corse of a "day"
+#1500 observations over the corse of a "day" 
 better_data <- read_csv("Use new_data.csv", col_types = cols(date = col_date(format = "%Y/%m/%d"), time = col_time(format = "%H:%M")))
 
 attach(fake_baseline_data)
@@ -23,7 +23,7 @@ floor_enter.ts<-ts(floor_enter, frequency = 144)
 #I am not testing for stationartiy or trend because I do not beleive that it applies in this situation
 
 #first "thrid" model, forces seasonality
-mod3<-auto.arima(data.ts,D=1)
+mod3<-auto.arima(floor_enter.ts,D=1)
 forcast_mod3 <- forecast(mod3, h=288)
 plot(forcast_mod3)
 
@@ -46,6 +46,7 @@ better_data <- better_data %>% mutate(ran_loc = round(runif(1500,1,10)))
 better_data <- better_data %>% mutate(ran_loc_diff = lag(exit, n = 1L))
 better_data <- better_data %>% mutate(ran_loc_time_sec = (3 + 1*ran_loc_diff))
 
+attach(better_data)
 #looks like the random floor does worse than the first lag
 sum(current_loc_time_sec, na.rm = TRUE)
 sum(ran_loc_time_sec, na.rm = TRUE)
@@ -54,10 +55,11 @@ sum(ran_loc_time_sec, na.rm = TRUE)
 
 round_any <- function(x, accuracy, f=round){f(x/ accuracy) * accuracy}
 better_data <- better_data %>% mutate(round_time = round_any(time_fraction, (1/144)))
-better_data <- better_data %>% aggregate(by = list(round_time), FUN = "mean")
-better_data <- better_data %>% mutate(rounded_enter = round_any(enter, 1))
+better_data_collapse <- aggregate(better_data, by = list(round_time), FUN = "mean")
+better_data_collapse <- better_data_collapse %>% mutate(rounded_enter = round_any(enter, 1))
 
-attach(better_data)
+
+attach(better_data_collapse)
 plot(rounded_enter, type = "l")
 
 ####Alright, had some issues with my join, could not get my vars lined up
@@ -71,20 +73,20 @@ names(data_join)[3] <- "ind2"
 #the syntax was a little tricky here so I just did it in a query
 entersql <- sqldf('Select enter, round_time, ind2, "c.time_slot."
                    from data_join
-                   left join better_data  on round_time = "c.time_slot."')
+                   left join better_data_collapse  on round_time = "c.time_slot."')
 
 ####Okay So I need to generate some new varibles for times when nobody was there 
 
-better_data <- better_data %>% mutate(round_time_144 <- c(round_time * 144))
-names(better_data)[19] <- "round_time_144"
+better_data_collapse <- better_data_collapse %>% mutate(round_time_144 <- c(round_time * 144))
+names(better_data_collapse)[19] <- "round_time_144"
 data_join <- data_join %>% mutate(round_time_base_144 <- c(c.time_slot. * 144))
-names(data_join)[5] <- "round_time_base_144"
-better_data <- better_data %>% mutate(final_round_time_144 <- round_any(round_time_144, 1))
-names(better_data)[20] <- "final_round_time_144"
+names(data_join)[4] <- "round_time_base_144"
+better_data_collapse <- better_data_collapse %>% mutate(final_round_time_144 <- round_any(round_time_144, 1))
+names(better_data_collapse)[20] <- "final_round_time_144"
 
-entersql2 <- sqldf('Select enter, round_time, ind2, round_time_144, round_time_base_144
+entersql2 <- sqldf('Select enter, round_time, ind2, round_time_144, round_time_base_144, rounded_enter
                   from data_join
-                  left join better_data  on final_round_time_144 = round_time_base_144')
+                  left join better_data_collapse  on final_round_time_144 = round_time_base_144')
 
 #######alright changing my data (NA to 2)###########################################################
 
