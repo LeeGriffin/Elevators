@@ -13,6 +13,7 @@ I will try to be as step by step in my actual script as possible, but pretty muc
   2) Important some new data and adding some columns of variables (some cleaning)
   3) Collapsing my data into 10 min averages and further cleaning
   4) Running an ARIMA model on this new data (current)
+  
   ###Next Steps###
   5)Trying out different kinds of forecasting models
   6)Showing the number of floors saved
