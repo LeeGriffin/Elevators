@@ -16,5 +16,5 @@ I will try to be as step by step in my actual script as possible, but pretty muc
   
   ---Next Steps---
   
-  5)Trying out different kinds of forecasting models
-  6)Showing the number of floors saved
+   5. Trying out different kinds of forecasting models
+   6. Showing the number of floors saved
