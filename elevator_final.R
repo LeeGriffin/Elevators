@@ -75,7 +75,7 @@ entersql <- sqldf('Select enter, round_time, ind2, "c.time_slot."
                    from data_join
                    left join better_data_collapse  on round_time = "c.time_slot."')
 
-####Okay So I need to generate some new varibles for times when nobody was there 
+####Okay So I need to generate some new variables for times when nobody was there
 
 better_data_collapse <- better_data_collapse %>% mutate(round_time_144 <- c(round_time * 144))
 names(better_data_collapse)[19] <- "round_time_144"
@@ -112,3 +112,8 @@ forcast_entersql2.ts <- forecast(mod13, h=144)
 plot(forcast_entersql2.ts)
 
 #that took a while but I finally got my results
+#I have since realized that if I wanted to do this in a real life situation I would probably need to break the entire week into 10 min intervals to account for weekends
+
+
+
+
