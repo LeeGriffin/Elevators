@@ -77,7 +77,9 @@ enter9 <- enter8 %>% mutate(ran_loc_time_sec = (3 + 1*ran_loc_diff))
 attach(enter9)
 #looks like the random floor does worse than the first lag
 sum(current_loc_time_sec, na.rm = TRUE)
+#5684
 sum(ran_loc_time_sec, na.rm = TRUE)
+#9456
 
 ###########################################################Now I have to be able to collapse it##################
 
@@ -179,4 +181,4 @@ attach(better_data_mean_test)
 better_data_mean_test <- better_data_mean_test %>% mutate(mean_diff = (better_data_mean_test$enter - better_data_mean_test$mean_forecast))
 better_data_mean_test <- better_data_mean_test %>% mutate(mean_diff = abs(mean_diff))
 sum(mean_diff, na.rm = TRUE)
-#welp shit I got 2486
+#welp, I got 2486.... nice
