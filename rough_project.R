@@ -141,3 +141,42 @@ forcast_entersql2.ts <- forecast(mod13, h=144)
 plot(forcast_entersql2.ts)
 
 #that took a while but I finally got my results
+
+
+
+######################################################################################################
+####Alright now I need to un-collapse everything and see if my results are better --> this is started from the "pretty R script" so will
+####not run all at once nicely anymore, but that is what the final script is for anyway
+######################################################################################################
+
+forcast_entersql2_mean <- data.frame(forcast_entersql2.ts)
+print(forcast_entersql2_mean$id)
+b = 1:144
+forcast_entersql2_mean <- forcast_entersql2_mean %>% mutate(merge1 = (b/144))
+names(forcast_entersql2_mean) [1]<-"mean_forecast"
+
+
+better_data_mean_test <- sqldf('select round_time, enter, exit, mean_forecast
+                                from better_data
+                                left join forcast_entersql2_mean on merge1 = round_time')
+print(better_data_mean_test)
+
+###shit, okay so kind of the same problem as before, my merges are not adding up 
+###already have round_time_144 
+forcast_entersql2_mean <- forcast_entersql2_mean %>% mutate(round_time_forecast_144 <- c(merge1 * 144))
+names(forcast_entersql2_mean) [7]<-"round_time_forecast_144"
+forcast_entersql2_mean <- forcast_entersql2_mean %>% mutate(round_time_forecast_1442 <- round_any(forcast_entersql2_mean$round_time_forecast_144, 1))
+names(forcast_entersql2_mean) [8]<-"round_time_forecast_1442"
+better_data <- better_data %>% mutate(round_time_join_144 <- c(round_time * 144))
+names(better_data) [17] <- "round_time_join_144"
+better_data <- better_data %>% mutate(round_time_join_1442 <- round_any(round_time_join_144,1))
+names(better_data) [18] <- "round_time_join_1442"  
+
+better_data_mean_test <- sqldf('select round_time, enter, exit, mean_forecast
+                                from better_data
+                                left join forcast_entersql2_mean on round_time_forecast_1442 = round_time_join_1442')
+attach(better_data_mean_test)
+better_data_mean_test <- better_data_mean_test %>% mutate(mean_diff = (better_data_mean_test$enter - better_data_mean_test$mean_forecast))
+better_data_mean_test <- better_data_mean_test %>% mutate(mean_diff = abs(mean_diff))
+sum(mean_diff, na.rm = TRUE)
+#welp shit I got 2486
