@@ -48,14 +48,20 @@ better_data <- better_data %>% mutate(ran_loc_time_sec = (3 + 1*ran_loc_diff))
 
 attach(better_data)
 #looks like the random floor does worse than the first lag
-sum(current_loc_time_sec, na.rm = TRUE)
-sum(ran_loc_time_sec, na.rm = TRUE)
+better_data <- better_data %>% mutate(current_loc_diff = abs(current_loc_diff))
+sum(current_loc_diff, na.rm = TRUE)
+#5684 or 5063 --> have to test this on the weekend 
+better_data <- better_data %>% mutate(ran_loc_diff = abs(ran_loc_diff))
+sum(ran_loc_diff, na.rm = TRUE)
+#9456 -> or 4959 not exactly sure
+
 
 ###########################################################Now I have to be able to collapse it##################
 
 round_any <- function(x, accuracy, f=round){f(x/ accuracy) * accuracy}
 better_data <- better_data %>% mutate(round_time = round_any(time_fraction, (1/144)))
-better_data_collapse <- aggregate(better_data, by = list(round_time), FUN = "mean")
+plot(better_data$round_time)
+better_data_collapse <- aggregate(better_data, by = list(round_time2 = better_data$round_time), FUN = "mean")
 better_data_collapse <- better_data_collapse %>% mutate(rounded_enter = round_any(enter, 1))
 
 
@@ -114,6 +120,33 @@ plot(forcast_entersql2.ts)
 #that took a while but I finally got my results
 #I have since realized that if I wanted to do this in a real life situation I would probably need to break the entire week into 10 min intervals to account for weekends
 
+######################################################################################################
+####Alright now I need to un-collapse everything and see if my results are better
+######################################################################################################
 
+forcast_entersql2_mean <- data.frame(forcast_entersql2.ts)
+b = 1:144
+forcast_entersql2_mean <- forcast_entersql2_mean %>% mutate(merge1 = (b/144))
+names(forcast_entersql2_mean) [1]<-"mean_forecast"
 
+###shit, okay so kind of the same problem as before, my joins are not adding up 
+
+forcast_entersql2_mean <- forcast_entersql2_mean %>% mutate(round_time_forecast_144 <- c(merge1 * 144))
+names(forcast_entersql2_mean) [7]<-"round_time_forecast_144"
+forcast_entersql2_mean <- forcast_entersql2_mean %>% mutate(round_time_forecast_1442 <- round_any(forcast_entersql2_mean$round_time_forecast_144, 1))
+names(forcast_entersql2_mean) [8]<-"round_time_forecast_1442"
+better_data <- better_data %>% mutate(round_time_join_144 <- c(round_time * 144))
+names(better_data) [17] <- "round_time_join_144"
+better_data <- better_data %>% mutate(round_time_join_1442 <- round_any(round_time_join_144,1))
+names(better_data) [18] <- "round_time_join_1442"  
+
+better_data_mean_test <- sqldf('select round_time, enter, exit, mean_forecast
+                                from better_data
+                                left join forcast_entersql2_mean on round_time_forecast_1442 = round_time_join_1442')
+#seeing if all of this work was for anything
+attach(better_data_mean_test)
+better_data_mean_test <- better_data_mean_test %>% mutate(mean_diff = (better_data_mean_test$enter - better_data_mean_test$mean_forecast))
+better_data_mean_test <- better_data_mean_test %>% mutate(mean_diff = abs(mean_diff))
+sum(mean_diff, na.rm = TRUE)
+#whoop whoop! I got 2486, it seems to have worked
 
