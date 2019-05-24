@@ -3,7 +3,7 @@
 Okay so I hate the elevators in our building (they are old slow, terrible, and always get “stuck” at the top floors) and that got me thinking about ways to make them better.
 What if I could forecast the floor that an elevator should be on? So in this project I am going to try and take some (fake made up by me) elevator data and try to forecast what floor it should stop on based on the time of day.
 
-#########################################################################################
+############################################################################################
 And this is an excuse to learn some R (it will be obvious soon that this is my first project in R).
 
 My end goal is to be able to take one days worth of data (when people get to the elevator, what floor they get on) collapse that (by mean) to 144 10 min "sections" of time, round those answers which should lead to me having this nice data set. Then run a seasonal ARIMA model to predict where the elevator should be on the next day.
