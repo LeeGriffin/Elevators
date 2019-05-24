@@ -5,12 +5,14 @@ library(forecast)
 library(dplyr)
 library(sqldf)
 
-#five days of random data to prove the concept 
-fake_baseline_data <- read_excel("Use fake_baseline_data.xlsx Here", sheet = "Sheet2", col_types = c("date", "numeric", "numeric", "numeric", "numeric"))
-#1500 observations over the corse of a "day" 
-better_data <- read_csv("Use new_data.csv", col_types = cols(date = col_date(format = "%Y/%m/%d"), time = col_time(format = "%H:%M")))
+#five days of random data to prove the concept
+#use the file path to the "fake baseline data" in place of my file path
+fake_baseline_data <- read_excel("C:/Users/lee/Desktop/fake_baseline_data.xlsx")
 
-attach(fake_baseline_data)
+#1500 observations over the corse of a "day"
+#same as above, yes i know one is a csv and one is in an excel sheet, your just going to have to deal with it
+better_data <- read_csv("C:/Users/lee/Desktop/new_data.csv")
+
 
 head(fake_baseline_data)
 plot(`Floor Enter`, type = "l")
@@ -46,14 +48,16 @@ better_data <- better_data %>% mutate(ran_loc = round(runif(1500,1,10)))
 better_data <- better_data %>% mutate(ran_loc_diff = lag(exit, n = 1L))
 better_data <- better_data %>% mutate(ran_loc_time_sec = (3 + 1*ran_loc_diff))
 
-attach(better_data)
-#looks like the random floor does worse than the first lag
+#looks like if the elevator was on a random floor it would be better than moving from the previous floor
+#It should be noted that because there are lots of random values that these numbers will change, but I have ran this 
+#several times and I tend to get that random misses by less total floors
 better_data <- better_data %>% mutate(current_loc_diff = abs(current_loc_diff))
-sum(current_loc_diff, na.rm = TRUE)
-#5684 or 5063 --> have to test this on the weekend 
+sum(better_data$current_loc_diff, na.rm = TRUE) #5264
+mean(better_data$current_loc_diff, na.rm = TRUE) #3.511
+
 better_data <- better_data %>% mutate(ran_loc_diff = abs(ran_loc_diff))
-sum(ran_loc_diff, na.rm = TRUE)
-#9456 -> or 4959 not exactly sure
+sum(better_data$ran_loc_diff, na.rm = TRUE) #5070
+mean(better_data$ran_loc_diff, na.rm = TRUE) #3.382
 
 
 ###########################################################Now I have to be able to collapse it##################
@@ -65,7 +69,6 @@ better_data_collapse <- aggregate(better_data, by = list(round_time2 = better_da
 better_data_collapse <- better_data_collapse %>% mutate(rounded_enter = round_any(enter, 1))
 
 
-attach(better_data_collapse)
 plot(rounded_enter, type = "l")
 
 ####Alright, had some issues with my join, could not get my vars lined up
@@ -144,9 +147,10 @@ better_data_mean_test <- sqldf('select round_time, enter, exit, mean_forecast
                                 from better_data
                                 left join forcast_entersql2_mean on round_time_forecast_1442 = round_time_join_1442')
 #seeing if all of this work was for anything
-attach(better_data_mean_test)
 better_data_mean_test <- better_data_mean_test %>% mutate(mean_diff = (better_data_mean_test$enter - better_data_mean_test$mean_forecast))
 better_data_mean_test <- better_data_mean_test %>% mutate(mean_diff = abs(mean_diff))
-sum(mean_diff, na.rm = TRUE)
-#whoop whoop! I got 2486, it seems to have worked
 
+#again because of the use of random numbers these numbers will not be exact
+sum(better_data_mean_test$mean_diff, na.rm = TRUE) #2450
+mean(better_data_mean_test$mean_diff, na.rm = TRUE) #1.6333 floors off on average
+#whoop whoop! It seems to have worked
