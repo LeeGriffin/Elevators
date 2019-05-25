@@ -65,6 +65,7 @@ mean(better_data$ran_loc_diff, na.rm = TRUE) #3.382
 round_any <- function(x, accuracy, f=round){f(x/ accuracy) * accuracy}
 better_data <- better_data %>% mutate(round_time = round_any(time_fraction, (1/144)))
 plot(better_data$round_time)
+#you could also toss in a "median" below, I found that it got good but slightly worse results
 better_data_collapse <- aggregate(better_data, by = list(round_time2 = better_data$round_time), FUN = "mean")
 better_data_collapse <- better_data_collapse %>% mutate(rounded_enter = round_any(enter, 1))
 
