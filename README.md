@@ -17,6 +17,5 @@ I will try to be as step by step in my actual script as possible, but pretty muc
   
   ---Next Steps---
   
-   6. Collapsing by median or mode and compare that to mean (my first collapse)  
-   7. Trying out different kinds of forecasting models
+  6) Trying out different kinds of forecasting models
    
