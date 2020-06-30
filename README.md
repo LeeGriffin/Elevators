@@ -17,5 +17,6 @@ I will try to be as step by step in my actual script as possible, but pretty muc
   
   ---Next Steps---
   
-  6) Trying out different kinds of forecasting models
+  6) Getting actual of people getting on elevators
+  7) Trying out different kinds of forecasting models
    
