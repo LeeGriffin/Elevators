@@ -12,7 +12,7 @@ I will try to be as step by step in my actual script as possible, but pretty muc
   1) Proof of concept with some super random data
   2) Import some new data and adding some columns of variables (some cleaning)
   3) Collapsing my data into 10 min averages and further cleaning
-  4) Running an ARIMA model on this new data (current)
+  4) Running an ARIMA model on this new data
   5) Showing the number of floors saved
   
   ---Next Steps---
